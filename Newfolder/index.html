@@ -6,89 +6,43 @@
 
 <style>
 body{
- font-family:Arial;
- background:#0f172a;
- color:white;
- text-align:center;
- overflow-x:hidden;
+font-family:Arial;
+background:#0f172a;
+color:white;
+text-align:center;
 }
 
 .box{
- background:#1e293b;
- padding:25px;
- margin:30px auto;
- width:360px;
- border-radius:14px;
- box-shadow:0 0 25px #0006;
-}
-
-.hello{
- font-size:22px;
- font-weight:bold;
- background:linear-gradient(90deg,#22c55e,#38bdf8);
- -webkit-background-clip:text;
- color:transparent;
+background:#1e293b;
+padding:25px;
+margin:30px auto;
+width:360px;
+border-radius:14px;
 }
 
 button{
- padding:10px;
- margin:6px;
- border:none;
- border-radius:8px;
- background:#22c55e;
- color:white;
- cursor:pointer;
- font-weight:bold;
+padding:10px;
+margin:6px;
+border:none;
+border-radius:8px;
+background:#22c55e;
+color:white;
+cursor:pointer;
 }
-
-button:hover{transform:scale(1.05)}
-
-.logout{background:#ef4444;}
-.musicBtn{background:#38bdf8;}
 
 input{
- padding:10px;
- margin:6px;
- width:90%;
- border-radius:6px;
- border:none;
-}
-
-#withdrawBox,#welcomeBox{
- position:fixed;
- top:0;
- left:0;
- width:100%;
- height:100%;
- background:rgba(0,0,0,.7);
- display:none;
- justify-content:center;
- align-items:center;
- z-index:9999;
-}
-
-.popup{
- background:#1e293b;
- padding:25px;
- border-radius:12px;
- width:340px;
+padding:10px;
+margin:6px;
+width:90%;
+border-radius:6px;
+border:none;
 }
 
 .adminUser{
- background:#0f172a;
- margin:8px;
- padding:10px;
- border-radius:8px;
-}
-
-.petal{
- position:fixed;
- top:-50px;
- animation:fall linear forwards;
-}
-
-@keyframes fall{
- 100%{transform:translateY(110vh) rotate(360deg)}
+background:#0f172a;
+margin:6px;
+padding:10px;
+border-radius:8px;
 }
 </style>
 </head>
@@ -97,159 +51,140 @@ input{
 
 <h1>💰 TaskHub</h1>
 
-<audio id="bgMusic" loop>
-<source src="music.mp3" type="audio/mpeg">
-</audio>
-
-<!-- LOGIN -->
 <div id="auth" class="box">
-<h3>Đăng ký / Đăng nhập</h3>
 <input id="user" placeholder="Username">
 <input id="pass" type="password" placeholder="Password"><br>
 <button onclick="register()">Đăng ký</button>
 <button onclick="login()">Đăng nhập</button>
 </div>
 
-<!-- DASHBOARD -->
 <div id="dashboard" class="box" style="display:none">
-<div class="hello">
-👋 Xin chào <span id="name"></span>
-</div>
-
+<p>Xin chào <b id="name"></b></p>
 <p>Số dư: <b id="money">0</b>đ</p>
 
-<button onclick="taoTask()">🧩 Làm nhiệm vụ (+200đ)</button>
-<button onclick="rutTien()">💸 Rút tiền</button>
-<button onclick="toggleMusic()" class="musicBtn">🎵 Nhạc</button>
-<button class="logout" onclick="logout()">Đăng xuất</button>
+<button onclick="taoTask()">🧩 Làm nhiệm vụ</button>
+<button onclick="logout()">Đăng xuất</button>
 
 <p id="status"></p>
 </div>
 
-<!-- ADMIN -->
 <div id="adminPanel" class="box" style="display:none">
-<h3>🛠 ADMIN PANEL</h3>
+<h3>ADMIN PANEL</h3>
 <div id="userList"></div>
-</div>
-
-<!-- POPUP -->
-<div id="withdrawBox">
-<div class="popup">
-<h3>💸 Rút tiền</h3>
-<button onclick="openFB()">📩 IB Admin</button><br><br>
-<button onclick="closeWithdraw()">Đóng</button>
-</div>
-</div>
-
-<div id="welcomeBox">
-<div class="popup">
-<h3 style="color:#22c55e">🎉 CHÀO MỪNG 🎉</h3>
-<p>Welcome to <b>TaskHub</b></p>
-<button onclick="closeWelcome()">Bắt đầu 🚀</button>
-</div>
 </div>
 
 <script>
 
-/* ================= API ================= */
-
 const API="http://localhost:5000";
-let currentUser=null;
+let currentUser="";
+let isAdmin=false;
 
-/* ================= AUTH ================= */
-
+/* REGISTER */
 async function register(){
 
- let res=await fetch(API+"/register",{
-  method:"POST",
-  headers:{'Content-Type':'application/json'},
-  body:JSON.stringify({
-    user:user.value,
-    pass:pass.value
-  })
- });
+let res=await fetch(API+"/register",{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+user:user.value,
+pass:pass.value
+})
+});
 
- let data=await res.json();
-
- if(data.ok) alert("✅ Đăng ký thành công");
- else alert(data.error);
+let d=await res.json();
+alert(d.ok?"Đăng ký OK":"User tồn tại");
 }
 
+/* LOGIN */
 async function login(){
 
- let res=await fetch(API+"/login",{
-  method:"POST",
-  headers:{'Content-Type':'application/json'},
-  body:JSON.stringify({
-    user:user.value,
-    pass:pass.value
-  })
- });
+let res=await fetch(API+"/login",{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+user:user.value,
+pass:pass.value
+})
+});
 
- let data=await res.json();
+let d=await res.json();
 
- if(data.error){
-  alert(data.error);
-  return;
- }
+if(!d.ok) return alert("Sai tài khoản");
 
- currentUser=data.user;
+currentUser=user.value;
+name.innerText=currentUser;
 
- auth.style.display="none";
- dashboard.style.display="block";
+auth.style.display="none";
+dashboard.style.display="block";
 
- name.innerText=data.user;
- money.innerText=data.money;
-
- if(data.user==="admin"){
-   adminPanel.style.display="block";
-   loadAdmin();
- }
-
- welcomeBox.style.display="flex";
+if(d.admin){
+isAdmin=true;
+adminPanel.style.display="block";
+loadAdmin();
+}else{
+money.innerText=d.money;
+}
 }
 
-function logout(){
- location.reload();
-}
-
-function closeWelcome(){
- welcomeBox.style.display="none";
-}
-
-/* ================= TASK ================= */
-
+/* TASK */
 async function taoTask(){
 
- status.innerText="⏳ Đang xử lý...";
+status.innerText="Đang tạo nhiệm vụ...";
 
- let res=await fetch(API+"/task",{
-  method:"POST",
-  headers:{'Content-Type':'application/json'},
-  body:JSON.stringify({user:currentUser})
- });
+let res=await fetch(API+"/create_task",{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({user:currentUser})
+});
 
- let data=await res.json();
+let d=await res.json();
 
- money.innerText=data.money;
- status.innerText="✅ +200đ thành công!";
+window.open(d.link,"_blank");
 }
 
-/* ================= ADMIN ================= */
-
+/* ADMIN LOAD */
 async function loadAdmin(){
 
- let res=await fetch(API+"/admin/users");
- let users=await res.json();
+let res=await fetch(API+"/users");
+let users=await res.json();
 
- userList.innerHTML="";
+userList.innerHTML="";
 
- for(let u in users){
+for(let u in users){
 
-  let div=document.createElement("div");
-  div.className="adminUser";
+let div=document.createElement("div");
+div.className="adminUser";
 
-  div.innerHTML=`
-   👤 ${u}<br>
-   💰 <input id="money_${u}" value="${users[u].money}">
-   <button onclick="upda
+div.innerHTML=`
+👤 ${u}
+<input id="m_${u}" value="${users[u].money}">
+<button onclick="saveMoney('${u}')">Lưu</button>
+`;
+
+userList.appendChild(div);
+}
+}
+
+/* UPDATE MONEY */
+async function saveMoney(u){
+
+let value=document.getElementById("m_"+u).value;
+
+await fetch(API+"/update_money",{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+user:u,
+money:value
+})
+});
+
+alert("Đã cập nhật");
+loadAdmin();
+}
+
+function logout(){location.reload();}
+
+</script>
+</body>
+</html>
