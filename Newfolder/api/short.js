@@ -1,27 +1,26 @@
 export default async function handler(req, res) {
 
- const url=req.query.url;
+  const { url } = req.query;
 
- if(!url){
-  return res.status(400).json({error:"missing url"});
- }
+  if (!url) {
+    res.status(400).json({ error: "missing url" });
+    return;
+  }
 
- const TOKEN="YOUR_YEUMONEY_TOKEN";
+  const token = "d754503b7998d34db1e601738a0934fca7dbd20a72fdd615ecabcf6a6919a14a";
 
- const api=
- "https://yeumoney.com/QL_api.php"
- +"?token="+TOKEN
- +"&format=json"
- +"&url="+encodeURIComponent(url);
+  const api =
+    `https://yeumoney.com/QL_api.php?token=${token}&format=text&url=${encodeURIComponent(url)}`;
 
- try{
+  try {
+    const r = await fetch(api);
+    const text = await r.text();
 
-  const r=await fetch(api);
-  const data=await r.json();
+    res.status(200).json({
+      short: text.trim()
+    });
 
-  res.status(200).json(data);
-
- }catch(e){
-  res.status(500).json({error:"api error"});
- }
+  } catch (e) {
+    res.status(500).json({ error: "api failed" });
+  }
 }
