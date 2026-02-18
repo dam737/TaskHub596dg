@@ -3,11 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <title>TaskHub</title>
+
 <style>
-body{font-family:Arial;background:#0f172a;color:white;text-align:center}
-.box{background:#1e293b;padding:20px;margin:20px auto;width:350px;border-radius:10px}
-button{padding:10px;margin:5px;border:none;border-radius:6px;background:#22c55e;color:white}
-input{padding:10px;margin:5px;width:90%}
+body{
+  font-family:Arial;
+  background:#0f172a;
+  color:white;
+  text-align:center;
+}
+
+.box{
+  background:#1e293b;
+  padding:20px;
+  margin:20px auto;
+  width:360px;
+  border-radius:12px;
+}
+
+button{
+  padding:10px;
+  margin:6px;
+  border:none;
+  border-radius:6px;
+  background:#22c55e;
+  color:white;
+  cursor:pointer;
+}
+
+input{
+  padding:10px;
+  margin:5px;
+  width:90%;
+}
+
+#withdrawBox{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.7);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+
+.popup{
+  background:#1e293b;
+  padding:25px;
+  border-radius:12px;
+  width:350px;
+}
 </style>
 </head>
 
@@ -15,15 +61,17 @@ input{padding:10px;margin:5px;width:90%}
 
 <h1>💰 TaskHub</h1>
 
+<!-- LOGIN -->
 <div id="auth" class="box">
 <h3>Đăng ký / Đăng nhập</h3>
 <input id="user" placeholder="Username">
-<input id="pass" type="password" placeholder="Password">
-<br>
+<input id="pass" type="password" placeholder="Password"><br>
+
 <button onclick="register()">Đăng ký</button>
 <button onclick="login()">Đăng nhập</button>
 </div>
 
+<!-- DASHBOARD -->
 <div id="dashboard" class="box" style="display:none">
 <h3>Xin chào <span id="name"></span></h3>
 <p>Số dư: <b id="money">0</b>đ</p>
@@ -31,19 +79,50 @@ input{padding:10px;margin:5px;width:90%}
 <button onclick="taoTask()">🧩 Làm nhiệm vụ</button>
 <button onclick="rutTien()">💸 Rút tiền</button>
 
-<div id="tasklink"></div>
+<p id="status"></p>
+</div>
+
+<!-- POPUP RÚT TIỀN -->
+<div id="withdrawBox">
+  <div class="popup">
+
+    <h3>💸 Yêu cầu rút tiền</h3>
+
+    <p>Hỗ trợ rút qua:</p>
+
+    <p>🏦 Chuyển khoản ngân hàng</p>
+    <p>📱 Thẻ cào (Viettel / Mobi / Vina)</p>
+
+    <hr>
+
+    <p>👉 Nhắn tin Facebook để rút tiền</p>
+
+    <button onclick="openFB()">📩 IB Admin</button>
+    <br><br>
+    <button onclick="closeWithdraw()">Đóng</button>
+
+  </div>
 </div>
 
 <script>
+
+/* ================= LOGIN ================= */
+
 function saveUser(u,p){
  localStorage.setItem("acc_"+u,p);
 }
 
 function register(){
- let u=user.value;
- let p=pass.value;
+ let u=user.value.trim();
+ let p=pass.value.trim();
+
+ if(!u || !p){
+   alert("Nhập đầy đủ thông tin");
+   return;
+ }
+
  saveUser(u,p);
- alert("Đăng ký thành công");
+ alert("✅ Đăng ký thành công");
 }
 
 function login(){
@@ -62,10 +141,13 @@ function start(){
 
  auth.style.display="none";
  dashboard.style.display="block";
+
  name.innerText=u;
  money.innerText=localStorage.getItem("money_"+u)||0;
 }
 start();
+
+/* ================= TASK ================= */
 
 function randomID(){
  return crypto.randomUUID().replaceAll("-","")+Date.now();
@@ -73,26 +155,63 @@ function randomID(){
 
 async function taoTask(){
 
+ let user = localStorage.getItem("login");
+ if(!user){
+   alert("Vui lòng đăng nhập!");
+   return;
+ }
+
+ status.innerText="⏳ Đang tạo nhiệm vụ...";
+
  let id=randomID();
 
- // link nhiệm vụ cuối
  let final="https://google.com";
 
- // gọi API YeuMoney
- let r=await fetch(`/api/short?url=${encodeURIComponent(location.origin+"/task.html?id="+id+"&url="+final)}`);
- let d=await r.json();
+ let taskURL =
+ location.origin +
+ "/task.html?id="+id+
+ "&url="+encodeURIComponent(final);
 
- tasklink.innerHTML=
- `<p>Link nhiệm vụ:</p>
- <a href="${d.short}" target="_blank">${d.short}</a>`;
+ try{
+
+   let r=await fetch(
+     `/api/short?url=${encodeURIComponent(taskURL)}`
+   );
+
+   let d=await r.json();
+
+   if(!d.short){
+     status.innerText="❌ Lỗi tạo nhiệm vụ";
+     return;
+   }
+
+   status.innerText="✅ Đang mở nhiệm vụ...";
+
+   // 🔥 tự mở YeuMoney
+   window.open(d.short,"_blank");
+
+ }catch{
+   status.innerText="❌ Server lỗi";
+ }
 }
 
+/* ================= RÚT TIỀN ================= */
+
 function rutTien(){
+ withdrawBox.style.display="flex";
+}
+
+function closeWithdraw(){
+ withdrawBox.style.display="none";
+}
+
+function openFB(){
  window.open(
  "https://www.facebook.com/profile.php?id=61555922620631",
  "_blank"
  );
 }
+
 </script>
 
 </body>
