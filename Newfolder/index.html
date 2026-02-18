@@ -1,168 +1,98 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Kiếm Tiền Online</title>
-
+<title>TaskHub</title>
 <style>
-body{
- font-family:Arial;
- background:#0f172a;
- color:white;
- display:flex;
- justify-content:center;
-}
-
-.card{
- background:#1e293b;
- padding:25px;
- margin-top:60px;
- border-radius:12px;
- width:360px;
- text-align:center;
- box-shadow:0 0 20px rgba(0,0,0,.5);
-}
-
-input,button{
- width:90%;
- padding:10px;
- margin:6px;
- border:none;
- border-radius:6px;
-}
-
-button{
- background:#22c55e;
- color:white;
- cursor:pointer;
-}
-
-.taskBtn{background:#3b82f6;}
-.withdrawBtn{background:#f59e0b;}
-
-.hidden{display:none;}
-
-.balance{
- font-size:22px;
- color:#22c55e;
-}
+body{font-family:Arial;background:#0f172a;color:white;text-align:center}
+.box{background:#1e293b;padding:20px;margin:20px auto;width:350px;border-radius:10px}
+button{padding:10px;margin:5px;border:none;border-radius:6px;background:#22c55e;color:white}
+input{padding:10px;margin:5px;width:90%}
 </style>
 </head>
 
 <body>
 
-<div class="card" id="loginBox">
-<h2>Đăng nhập</h2>
-<input id="user" placeholder="Tài khoản">
-<input id="pass" type="password" placeholder="Mật khẩu">
-<button onclick="login()">Đăng nhập</button>
+<h1>💰 TaskHub</h1>
+
+<div id="auth" class="box">
+<h3>Đăng ký / Đăng nhập</h3>
+<input id="user" placeholder="Username">
+<input id="pass" type="password" placeholder="Password">
+<br>
 <button onclick="register()">Đăng ký</button>
+<button onclick="login()">Đăng nhập</button>
 </div>
 
-<div class="card hidden" id="dashboard">
-<h2>💰 Trung tâm nhiệm vụ</h2>
+<div id="dashboard" class="box" style="display:none">
+<h3>Xin chào <span id="name"></span></h3>
+<p>Số dư: <b id="money">0</b>đ</p>
 
-<p>User: <b id="username"></b></p>
-<div class="balance" id="balance">0 VNĐ</div>
+<button onclick="taoTask()">🧩 Làm nhiệm vụ</button>
+<button onclick="rutTien()">💸 Rút tiền</button>
 
-<button class="taskBtn" onclick="createTask()">🚀 Làm nhiệm vụ</button>
-
-<button class="withdrawBtn" onclick="withdraw()">💸 Rút tiền</button>
-
-<p id="cooldownText"></p>
-
-<button onclick="logout()">Đăng xuất</button>
+<div id="tasklink"></div>
 </div>
 
 <script>
+function saveUser(u,p){
+ localStorage.setItem("acc_"+u,p);
+}
 
-/* ===== LOGIN ===== */
 function register(){
- localStorage.setItem(user.value,
- JSON.stringify({password:pass.value,balance:0,lastTask:0}));
+ let u=user.value;
+ let p=pass.value;
+ saveUser(u,p);
  alert("Đăng ký thành công");
 }
 
 function login(){
- let data=localStorage.getItem(user.value);
- if(!data) return alert("Sai tài khoản");
+ let u=user.value;
+ let p=pass.value;
 
- data=JSON.parse(data);
- if(data.password!==pass.value)
-  return alert("Sai mật khẩu");
-
- localStorage.setItem("currentUser",user.value);
- openDashboard();
+ if(localStorage.getItem("acc_"+u)==p){
+   localStorage.setItem("login",u);
+   start();
+ }else alert("Sai tài khoản");
 }
 
-function openDashboard(){
- loginBox.classList.add("hidden");
- dashboard.classList.remove("hidden");
+function start(){
+ let u=localStorage.getItem("login");
+ if(!u) return;
 
- let u=localStorage.getItem("currentUser");
- let data=JSON.parse(localStorage.getItem(u));
+ auth.style.display="none";
+ dashboard.style.display="block";
+ name.innerText=u;
+ money.innerText=localStorage.getItem("money_"+u)||0;
+}
+start();
 
- username.innerText=u;
- balance.innerText=data.balance+" VNĐ";
+function randomID(){
+ return crypto.randomUUID().replaceAll("-","")+Date.now();
 }
 
-/* ===== CREATE TASK ===== */
-async function createTask(){
+async function taoTask(){
 
- let u=localStorage.getItem("currentUser");
- let data=JSON.parse(localStorage.getItem(u));
+ let id=randomID();
 
- let now=Math.floor(Date.now()/1000);
+ // link nhiệm vụ cuối
+ let final="https://google.com";
 
- if(now-data.lastTask<30){
-  alert("⏳ Không spam nhiệm vụ!");
-  return;
- }
+ // gọi API YeuMoney
+ let r=await fetch(`/api/short?url=${encodeURIComponent(location.origin+"/task.html?id="+id+"&url="+final)}`);
+ let d=await r.json();
 
- let id=crypto.randomUUID().replaceAll("-","");
-
- localStorage.setItem("task_"+id,u);
-
- let target=window.location.origin+
- "/task.html?id="+id;
-
- let res=await fetch("/api/short?url="+encodeURIComponent(target));
- let api=await res.json();
-
- if(api.status==="success"){
-   window.location.href=api.shortenedUrl;
- }else{
-   alert("API lỗi");
- }
+ tasklink.innerHTML=
+ `<p>Link nhiệm vụ:</p>
+ <a href="${d.short}" target="_blank">${d.short}</a>`;
 }
 
-/* ===== WITHDRAW ===== */
-function withdraw(){
-
- let u=localStorage.getItem("currentUser");
- let data=JSON.parse(localStorage.getItem(u));
-
- if(data.balance<10000){
-   alert("Tối thiểu rút 10k");
-   return;
- }
-
+function rutTien(){
  window.open(
  "https://www.facebook.com/profile.php?id=61555922620631",
  "_blank"
  );
 }
-
-/* ===== LOGOUT ===== */
-function logout(){
- localStorage.removeItem("currentUser");
- location.reload();
-}
-
-if(localStorage.getItem("currentUser")){
- openDashboard();
-}
-
 </script>
 
 </body>
