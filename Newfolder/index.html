@@ -1,1 +1,346 @@
-<!DOCTYPE html> <html> <head> <meta charset="UTF-8"> <title>TaskHub</title> <style> body{ font-family:Arial; background:#0f172a; color:white; text-align:center; overflow-x:hidden; } /* BOX */ .box{ background:#1e293b; padding:25px; margin:30px auto; width:360px; border-radius:14px; box-shadow:0 0 25px #0006; } /* HELLO */ .hello{ font-size:22px; font-weight:bold; background:linear-gradient(90deg,#22c55e,#38bdf8); -webkit-background-clip:text; color:transparent; margin-bottom:10px; } /* BUTTON */ button{ padding:10px; margin:6px; border:none; border-radius:8px; background:#22c55e; color:white; cursor:pointer; font-weight:bold; transition:.2s; } button:hover{ background:#16a34a; transform:scale(1.05); } .logout{background:#ef4444;} .musicBtn{background:#38bdf8;} input{ padding:10px; margin:6px; width:90%; border-radius:6px; border:none; } /* POPUP */ #withdrawBox,#welcomeBox{ position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:none; justify-content:center; align-items:center; z-index:9999; } .popup{ background:#1e293b; padding:25px; border-radius:12px; width:340px; box-shadow:0 0 25px #000; } /* 🌸 HOA ĐÀO */ .petal{ position:fixed; top:-50px; pointer-events:none; animation:fall linear forwards; z-index:999; } @keyframes fall{ 0%{transform:translateY(-50px) rotate(0)} 100%{transform:translateY(110vh) rotate(360deg)} } </style> </head> <body> <h1>💰 TaskHub</h1> <!-- MUSIC --> <audio id="bgMusic" loop> <source src="music.mp3" type="audio/mpeg"> </audio> <!-- LOGIN --> <div id="auth" class="box"> <h3>Đăng ký / Đăng nhập</h3> <input id="user" placeholder="Username"> <input id="pass" type="password" placeholder="Password"><br> <button onclick="register()">Đăng ký</button> <button onclick="login()">Đăng nhập</button> </div> <!-- DASHBOARD --> <div id="dashboard" class="box" style="display:none"> <div class="hello"> 👋 Xin chào <span id="name">User</span> ! </div> <p>Số dư: <b id="money">0</b>đ</p> <button onclick="taoTask()">🧩 Làm nhiệm vụ (+200đ)</button> <button onclick="rutTien()">💸 Rút tiền</button> <button onclick="toggleMusic()" class="musicBtn">🎵 Bật/Tắt nhạc</button> <button class="logout" onclick="logout()">Đăng xuất</button> <p id="status"></p> </div> <!-- POPUP RÚT TIỀN --> <div id="withdrawBox"> <div class="popup"> <h3>💸 Rút tiền</h3> <p>✅ Hỗ trợ rút qua:</p> <p>📱 Thẻ cào (Viettel / Mobi / Vina)</p> <p>🏦 Chuyển khoản ngân hàng</p> <hr> <p>👉 IB Facebook để được hỗ trợ rút:</p> <button onclick="openFB()">📩 IB Admin</button><br><br> <button onclick="closeWithdraw()">Đóng</button> </div> </div> <!-- POPUP CHÀO MỪNG --> <div id="welcomeBox"> <div class="popup"> <h3 style="color:#22c55e">🎉 CHÀO MỪNG 🎉</h3> <p> CHÀO MỪNG BẠN ĐẾN VỚI<br> <b>WEB KIẾM TIỀN TaskHub</b><br><br> Được lập trình và phát triển bởi<br> <b>Nguyễn Vũ Đam</b><br><br> ✅ Nhiệm vụ uy tín<br> ✅ Thanh toán nhanh<br> ✅ Hỗ trợ 24/7 </p> <button onclick="closeWelcome()">Bắt đầu kiếm tiền 🚀</button> </div> </div> <script> /* ========= AUTH ========= */ function register(){ let u=user.value.trim(); let p=pass.value.trim(); if(!u||!p) return alert("Nhập đủ thông tin"); localStorage.setItem("acc_"+u,p); alert("✅ Đăng ký thành công"); } function login(){ let u=user.value; let p=pass.value; if(localStorage.getItem("acc_"+u)==p){ localStorage.setItem("login",u); start(true); }else alert("Sai tài khoản"); } function logout(){ localStorage.removeItem("login"); location.reload(); } function start(showWelcome=false){ let u=localStorage.getItem("login"); if(!u) return; auth.style.display="none"; dashboard.style.display="block"; document.getElementById("name").innerText=u; document.getElementById("money").innerText= localStorage.getItem("money_"+u)||0; if(showWelcome){ welcomeBox.style.display="flex"; } } start(); function closeWelcome(){ welcomeBox.style.display="none"; } /* ========= TASK ========= */ async function taoTask(){ let user = localStorage.getItem("login"); if(!user) return alert("Chưa đăng nhập"); status.innerText="⏳ Đang tạo nhiệm vụ..."; let taskLink = location.origin+"/task.html?user="+user; try{ let res=await fetch("/api/short?url="+encodeURIComponent(taskLink)); let data=await res.json(); if(!data.short){ status.innerText="❌ Lỗi API"; return; } status.innerText="✅ Đang mở nhiệm vụ..."; window.open(data.short,"_blank"); }catch{ status.innerText="❌ Server lỗi"; } } /* ========= MUSIC ========= */ const music=document.getElementById("bgMusic"); let playing=false; function toggleMusic(){ if(!playing){ music.volume=0.4; music.play(); playing=true; }else{ music.pause(); playing=false; } } /* ========= RÚT TIỀN ========= */ function rutTien(){ withdrawBox.style.display="flex"; } function closeWithdraw(){ withdrawBox.style.display="none"; } function openFB(){ window.open( "https://www.facebook.com/profile.php?id=61555922620631", "_blank" ); } /* ========= HOA ĐÀO ========= */ function createPetal(){ const petal=document.createElement("div"); petal.className="petal"; petal.innerText="🌸"; petal.style.left=Math.random()*100+"vw"; petal.style.fontSize=(16+Math.random()*20)+"px"; petal.style.animationDuration=(5+Math.random()*5)+"s"; document.body.appendChild(petal); setTimeout(()=>petal.remove(),10000); } setInterval(createPetal,400); </script> </body> </html>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>TaskHub</title>
+
+<style>
+
+body{
+ font-family:Arial;
+ background:#0f172a;
+ color:white;
+ text-align:center;
+ overflow-x:hidden;
+}
+
+/* BOX */
+.box{
+ background:#1e293b;
+ padding:25px;
+ margin:30px auto;
+ width:360px;
+ border-radius:14px;
+ box-shadow:0 0 25px #0006;
+}
+
+/* HELLO */
+.hello{
+ font-size:22px;
+ font-weight:bold;
+ background:linear-gradient(90deg,#22c55e,#38bdf8);
+ -webkit-background-clip:text;
+ color:transparent;
+ margin-bottom:10px;
+}
+
+/* BUTTON */
+button{
+ padding:10px;
+ margin:6px;
+ border:none;
+ border-radius:8px;
+ background:#22c55e;
+ color:white;
+ cursor:pointer;
+ font-weight:bold;
+ transition:.2s;
+}
+
+button:hover{
+ background:#16a34a;
+ transform:scale(1.05);
+}
+
+.logout{background:#ef4444;}
+.musicBtn{background:#38bdf8;}
+
+input{
+ padding:10px;
+ margin:6px;
+ width:90%;
+ border-radius:6px;
+ border:none;
+}
+
+/* POPUP */
+#withdrawBox,#welcomeBox{
+ position:fixed;
+ top:0;
+ left:0;
+ width:100%;
+ height:100%;
+ background:rgba(0,0,0,0.7);
+ display:none;
+ justify-content:center;
+ align-items:center;
+ z-index:9999;
+}
+
+.popup{
+ background:#1e293b;
+ padding:25px;
+ border-radius:12px;
+ width:340px;
+ box-shadow:0 0 25px #000;
+}
+
+/* ADMIN */
+.adminUser{
+ background:#0f172a;
+ margin:8px;
+ padding:10px;
+ border-radius:8px;
+}
+
+/* 🌸 HOA ĐÀO */
+.petal{
+ position:fixed;
+ top:-50px;
+ pointer-events:none;
+ animation:fall linear forwards;
+ z-index:999;
+}
+
+@keyframes fall{
+ 0%{transform:translateY(-50px) rotate(0)}
+ 100%{transform:translateY(110vh) rotate(360deg)}
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>💰 TaskHub</h1>
+
+<!-- MUSIC -->
+<audio id="bgMusic" loop>
+<source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<!-- LOGIN -->
+<div id="auth" class="box">
+<h3>Đăng ký / Đăng nhập</h3>
+<input id="user" placeholder="Username">
+<input id="pass" type="password" placeholder="Password"><br>
+<button onclick="register()">Đăng ký</button>
+<button onclick="login()">Đăng nhập</button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="box" style="display:none">
+
+<div class="hello">
+👋 Xin chào <span id="name">User</span> !
+</div>
+
+<p>Số dư: <b id="money">0</b>đ</p>
+
+<button onclick="taoTask()">🧩 Làm nhiệm vụ (+200đ)</button>
+<button onclick="rutTien()">💸 Rút tiền</button>
+<button onclick="toggleMusic()" class="musicBtn">🎵 Nhạc</button>
+<button class="logout" onclick="logout()">Đăng xuất</button>
+
+<p id="status"></p>
+
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel" class="box" style="display:none">
+<h3>🛠 ADMIN PANEL</h3>
+<div id="userList"></div>
+</div>
+
+<!-- POPUP RÚT -->
+<div id="withdrawBox">
+<div class="popup">
+<h3>💸 Rút tiền</h3>
+<p>📱 Thẻ cào / 🏦 Ngân hàng</p>
+<button onclick="openFB()">📩 IB Admin</button><br><br>
+<button onclick="closeWithdraw()">Đóng</button>
+</div>
+</div>
+
+<!-- POPUP WELCOME -->
+<div id="welcomeBox">
+<div class="popup">
+<h3 style="color:#22c55e">🎉 CHÀO MỪNG 🎉</h3>
+<p>
+CHÀO MỪNG BẠN ĐẾN VỚI<br>
+<b>WEB KIẾM TIỀN TaskHub</b><br><br>
+Lập trình & phát triển bởi<br>
+<b>Nguyễn Vũ Đam</b>
+</p>
+<button onclick="closeWelcome()">Bắt đầu 🚀</button>
+</div>
+</div>
+
+<script>
+
+/* ===== ADMIN CONFIG ===== */
+const ADMIN_USER="admin";
+const ADMIN_PASS="123456";
+
+/* ===== AUTH ===== */
+
+function register(){
+ let u=user.value.trim();
+ let p=pass.value.trim();
+ if(!u||!p) return alert("Nhập đủ thông tin");
+
+ localStorage.setItem("acc_"+u,p);
+ alert("✅ Đăng ký thành công");
+}
+
+function login(){
+
+ let u=user.value;
+ let p=pass.value;
+
+ // ADMIN LOGIN
+ if(u===ADMIN_USER && p===ADMIN_PASS){
+   localStorage.setItem("login",u);
+   localStorage.setItem("isAdmin","true");
+   start(true);
+   loadAdmin();
+   return;
+ }
+
+ // USER LOGIN
+ if(localStorage.getItem("acc_"+u)==p){
+   localStorage.setItem("login",u);
+   localStorage.removeItem("isAdmin");
+   start(true);
+ }else{
+   alert("Sai tài khoản");
+ }
+}
+
+function logout(){
+ localStorage.removeItem("login");
+ localStorage.removeItem("isAdmin");
+ location.reload();
+}
+
+function start(showWelcome=false){
+
+ let u=localStorage.getItem("login");
+ if(!u) return;
+
+ auth.style.display="none";
+ dashboard.style.display="block";
+
+ name.innerText=u;
+ money.innerText=localStorage.getItem("money_"+u)||0;
+
+ if(showWelcome) welcomeBox.style.display="flex";
+
+ if(localStorage.getItem("isAdmin")){
+   adminPanel.style.display="block";
+   loadAdmin();
+ }
+}
+start();
+
+function closeWelcome(){
+ welcomeBox.style.display="none";
+}
+
+/* ===== TASK ===== */
+
+function taoTask(){
+
+ let u=localStorage.getItem("login");
+ let m=Number(localStorage.getItem("money_"+u)||0);
+
+ m+=200;
+
+ localStorage.setItem("money_"+u,m);
+ money.innerText=m;
+
+ status.innerText="✅ +200đ thành công!";
+}
+
+/* ===== MUSIC ===== */
+
+const music=document.getElementById("bgMusic");
+let playing=false;
+
+function toggleMusic(){
+ if(!playing){
+   music.volume=0.4;
+   music.play();
+   playing=true;
+ }else{
+   music.pause();
+   playing=false;
+ }
+}
+
+/* ===== WITHDRAW ===== */
+
+function rutTien(){withdrawBox.style.display="flex";}
+function closeWithdraw(){withdrawBox.style.display="none";}
+
+function openFB(){
+ window.open(
+ "https://www.facebook.com/profile.php?id=61555922620631",
+ "_blank"
+ );
+}
+
+/* ===== ADMIN SYSTEM ===== */
+
+function loadAdmin(){
+
+ userList.innerHTML="";
+
+ for(let key in localStorage){
+
+   if(key.startsWith("acc_")){
+
+     let username=key.replace("acc_","");
+     let money=localStorage.getItem("money_"+username)||0;
+
+     let div=document.createElement("div");
+     div.className="adminUser";
+
+     div.innerHTML=`
+       👤 ${username}<br>
+       💰 <input id="money_${username}" value="${money}">
+       <button onclick="updateMoney('${username}')">Lưu</button>
+     `;
+
+     userList.appendChild(div);
+   }
+ }
+}
+
+function updateMoney(username){
+
+ let value=document.getElementById("money_"+username).value;
+ localStorage.setItem("money_"+username,value);
+
+ alert("✅ Đã cập nhật tiền cho "+username);
+ loadAdmin();
+}
+
+/* ===== HOA ĐÀO ===== */
+
+function createPetal(){
+ const petal=document.createElement("div");
+ petal.className="petal";
+ petal.innerText="🌸";
+ petal.style.left=Math.random()*100+"vw";
+ petal.style.fontSize=(16+Math.random()*20)+"px";
+ petal.style.animationDuration=(5+Math.random()*5)+"s";
+ document.body.appendChild(petal);
+ setTimeout(()=>petal.remove(),10000);
+}
+
+setInterval(createPetal,400);
+
+</script>
+</body>
+</html>
