@@ -22,9 +22,9 @@ body{
  box-shadow:0 0 25px #0006;
 }
 
-/* HELLO TEXT */
+/* HELLO */
 .hello{
- font-size:20px;
+ font-size:22px;
  font-weight:bold;
  background:linear-gradient(90deg,#22c55e,#38bdf8);
  -webkit-background-clip:text;
@@ -32,6 +32,7 @@ body{
  margin-bottom:10px;
 }
 
+/* BUTTON */
 button{
  padding:10px;
  margin:6px;
@@ -49,6 +50,10 @@ button:hover{
 
 .logout{
  background:#ef4444;
+}
+
+.musicBtn{
+ background:#38bdf8;
 }
 
 input{
@@ -85,6 +90,11 @@ input{
 
 <h1>💰 TaskHub</h1>
 
+<!-- AUDIO -->
+<audio id="bgMusic" loop>
+<source src="music.mp3" type="audio/mpeg">
+</audio>
+
 <!-- LOGIN -->
 <div id="auth" class="box">
 <h3>Đăng ký / Đăng nhập</h3>
@@ -101,13 +111,14 @@ input{
 <div id="dashboard" class="box" style="display:none">
 
 <div class="hello">
-👋 Xin chào <span id="name"></span> !
+👋 Xin chào <span id="name">User</span> !
 </div>
 
 <p>Số dư: <b id="money">0</b>đ</p>
 
 <button onclick="taoTask()">🧩 Làm nhiệm vụ (+200đ)</button>
 <button onclick="rutTien()">💸 Rút tiền</button>
+<button onclick="toggleMusic()" class="musicBtn">🎵 Bật/Tắt nhạc</button>
 <button class="logout" onclick="logout()">Đăng xuất</button>
 
 <p id="status"></p>
@@ -140,8 +151,8 @@ input{
 /* ========= AUTH ========= */
 
 function register(){
- let u=user.value.trim();
- let p=pass.value.trim();
+ let u=document.getElementById("user").value.trim();
+ let p=document.getElementById("pass").value.trim();
 
  if(!u||!p) return alert("Nhập đủ thông tin");
 
@@ -168,11 +179,12 @@ function start(){
  let u=localStorage.getItem("login");
  if(!u) return;
 
- auth.style.display="none";
- dashboard.style.display="block";
+ document.getElementById("auth").style.display="none";
+ document.getElementById("dashboard").style.display="block";
 
- name.innerText=u;
- money.innerText=
+ document.getElementById("name").innerText=u;
+
+ document.getElementById("money").innerText =
  localStorage.getItem("money_"+u)||0;
 }
 start();
@@ -186,7 +198,6 @@ async function taoTask(){
 
  status.innerText="⏳ Đang tạo nhiệm vụ...";
 
- // link quay lại hoàn thành
  let taskLink =
  location.origin +
  "/task.html?user="+user;
@@ -210,6 +221,24 @@ async function taoTask(){
 
  }catch{
    status.innerText="❌ Server lỗi";
+ }
+
+}
+
+/* ========= MUSIC ========= */
+
+const music=document.getElementById("bgMusic");
+let playing=false;
+
+function toggleMusic(){
+
+ if(!playing){
+   music.volume=0.4;
+   music.play();
+   playing=true;
+ }else{
+   music.pause();
+   playing=false;
  }
 
 }
