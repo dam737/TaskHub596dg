@@ -1,141 +1,52 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>TaskHub</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
-
 <style>
-
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:'Poppins',sans-serif;
-}
-
 body{
-  background:linear-gradient(135deg,#0f172a,#020617);
-  color:white;
-  text-align:center;
-  min-height:100vh;
+ font-family:Arial;
+ background:#0f172a;
+ color:white;
+ text-align:center;
 }
-
-/* ===== TITLE ===== */
-
-h1{
-  margin-top:20px;
-  font-size:32px;
-  background:linear-gradient(90deg,#22c55e,#38bdf8,#a855f7);
-  -webkit-background-clip:text;
-  color:transparent;
-}
-
-/* ===== CARD ===== */
 
 .box{
-  background:#1e293bcc;
-  backdrop-filter:blur(12px);
-  padding:25px;
-  margin:25px auto;
-  width:380px;
-  border-radius:16px;
-  box-shadow:0 0 25px rgba(0,0,0,.5);
-  animation:fade .5s ease;
+ background:#1e293b;
+ padding:25px;
+ margin:30px auto;
+ width:360px;
+ border-radius:12px;
+ box-shadow:0 0 20px #0005;
 }
-
-@keyframes fade{
-  from{opacity:0;transform:translateY(20px)}
-  to{opacity:1}
-}
-
-/* ===== INPUT ===== */
-
-input{
-  width:90%;
-  padding:11px;
-  margin:8px;
-  border:none;
-  border-radius:8px;
-  outline:none;
-  background:#0f172a;
-  color:white;
-}
-
-/* ===== BUTTON ===== */
 
 button{
-  padding:10px 14px;
-  margin:6px;
-  border:none;
-  border-radius:8px;
-  background:linear-gradient(45deg,#22c55e,#16a34a);
-  color:white;
-  cursor:pointer;
-  transition:.25s;
-  font-weight:500;
+ padding:10px;
+ margin:6px;
+ border:none;
+ border-radius:8px;
+ background:#22c55e;
+ color:white;
+ cursor:pointer;
+ font-weight:bold;
 }
 
 button:hover{
-  transform:scale(1.05);
-  box-shadow:0 0 12px #22c55e;
+ background:#16a34a;
 }
 
-/* logout button */
+input{
+ padding:10px;
+ margin:6px;
+ width:90%;
+ border-radius:6px;
+ border:none;
+}
+
 .logout{
-  background:linear-gradient(45deg,#ef4444,#dc2626);
+ background:#ef4444;
 }
-
-/* ===== GREETING ===== */
-
-#greet{
-  font-size:22px;
-  font-weight:700;
-  background:linear-gradient(90deg,#38bdf8,#22c55e,#facc15);
-  -webkit-background-clip:text;
-  color:transparent;
-}
-
-/* ===== MONEY ===== */
-
-.money{
-  font-size:20px;
-  color:#22c55e;
-}
-
-/* ===== POPUP ===== */
-
-#withdrawBox{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.75);
-  display:none;
-  justify-content:center;
-  align-items:center;
-}
-
-.popup{
-  background:#1e293b;
-  padding:25px;
-  border-radius:15px;
-  width:350px;
-  animation:fade .3s;
-}
-
-/* ===== MUSIC BTN ===== */
-
-.musicBtn{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  background:#0ea5e9;
-  border-radius:50%;
-  width:55px;
-  height:55px;
-  font-size:20px;
-}
-
 </style>
 </head>
 
@@ -158,63 +69,30 @@ button:hover{
 <!-- DASHBOARD -->
 <div id="dashboard" class="box" style="display:none">
 
-<h3 id="greet">Xin chào 👋 <span id="name"></span> !</h3>
+<h3>Xin chào <span id="name" style="color:#22c55e"></span> 👋</h3>
 
-<p>Số dư:</p>
-<p class="money"><b id="money">0</b> đ</p>
+<p>Số dư: <b id="money">0</b>đ</p>
 
 <button onclick="taoTask()">🧩 Làm nhiệm vụ</button>
 <button onclick="rutTien()">💸 Rút tiền</button>
-<button class="logout" onclick="logout()">🚪 Đăng xuất</button>
+<button class="logout" onclick="logout()">Đăng xuất</button>
 
 <p id="status"></p>
 
 </div>
 
-<!-- POPUP RÚT TIỀN -->
-<div id="withdrawBox">
-<div class="popup">
-
-<h3>💸 Yêu cầu rút tiền</h3>
-
-<p>✅ Hỗ trợ:</p>
-<p>🏦 Ngân hàng (MB, VP, Vietcombank...)</p>
-<p>📱 Thẻ cào (Viettel / Mobi / Vina)</p>
-
-<hr style="margin:15px 0">
-
-<p>👉 Nhắn Admin để xử lý</p>
-
-<button onclick="openFB()">📩 IB Admin</button>
-<br><br>
-<button onclick="closeWithdraw()">Đóng</button>
-
-</div>
-</div>
-
-<!-- MUSIC -->
-<audio id="bgm" loop>
-<source src="https://files.catbox.moe/6h5y0m.mp3" type="audio/mpeg">
-</audio>
-
-<button class="musicBtn" onclick="toggleMusic()">🎵</button>
-
 <script>
 
-/* ========= ACCOUNT ========= */
-
-function saveUser(u,p){
- localStorage.setItem("acc_"+u,p);
-}
+/* ================= AUTH ================= */
 
 function register(){
  let u=user.value.trim();
  let p=pass.value.trim();
 
- if(!u||!p) return alert("Nhập đầy đủ!");
+ if(!u||!p) return alert("Nhập đủ thông tin");
 
- saveUser(u,p);
- alert("✅ Đăng ký thành công");
+ localStorage.setItem("acc_"+u,p);
+ alert("Đăng ký thành công");
 }
 
 function login(){
@@ -232,8 +110,6 @@ function logout(){
  location.reload();
 }
 
-/* ========= START ========= */
-
 function start(){
  let u=localStorage.getItem("login");
  if(!u) return;
@@ -242,57 +118,56 @@ function start(){
  dashboard.style.display="block";
 
  name.innerText=u;
- money.innerText=localStorage.getItem("money_"+u)||0;
+ money.innerText=
+ localStorage.getItem("money_"+u)||0;
 }
 start();
 
-/* ========= TASK ========= */
-
-function randomID(){
- return crypto.randomUUID().replaceAll("-","");
-}
+/* ================= TASK ================= */
 
 async function taoTask(){
 
- status.innerText="⏳ Đang tạo nhiệm vụ...";
+ let user = localStorage.getItem("login");
+ if(!user) return alert("Chưa đăng nhập");
 
- setTimeout(()=>{
-   status.innerText="✅ Nhiệm vụ đã mở!";
-   window.open("https://google.com","_blank");
- },1200);
+ status.innerText="Đang tạo nhiệm vụ...";
+
+ // ✅ LINK TASK CỦA CHÍNH WEB
+ let taskLink =
+ location.origin +
+ "/task.html?user="+user;
+
+ try{
+
+   let res = await fetch(
+     "/api/short?url="+encodeURIComponent(taskLink)
+   );
+
+   let data = await res.json();
+
+   if(!data.short){
+     status.innerText="API lỗi";
+     return;
+   }
+
+   status.innerText="Đang mở nhiệm vụ...";
+
+   // ✅ MỞ YEUMONEY
+   window.open(data.short,"_blank");
+
+ }catch{
+   status.innerText="Server lỗi";
+ }
+
 }
 
-/* ========= WITHDRAW ========= */
+/* ================= RÚT TIỀN ================= */
 
 function rutTien(){
- withdrawBox.style.display="flex";
-}
-
-function closeWithdraw(){
- withdrawBox.style.display="none";
-}
-
-function openFB(){
  window.open(
  "https://www.facebook.com/profile.php?id=61555922620631",
  "_blank"
  );
-}
-
-/* ========= MUSIC ========= */
-
-let playing=false;
-
-function toggleMusic(){
- let music=document.getElementById("bgm");
-
- if(!playing){
-   music.play();
-   playing=true;
- }else{
-   music.pause();
-   playing=false;
- }
 }
 
 </script>
