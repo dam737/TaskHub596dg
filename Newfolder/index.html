@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Kiếm Tiền Online</title>
+
+<style>
+body{
+ font-family:Arial;
+ background:#0f172a;
+ color:white;
+ display:flex;
+ justify-content:center;
+}
+
+.card{
+ background:#1e293b;
+ padding:25px;
+ margin-top:60px;
+ border-radius:12px;
+ width:360px;
+ text-align:center;
+ box-shadow:0 0 20px rgba(0,0,0,.5);
+}
+
+input,button{
+ width:90%;
+ padding:10px;
+ margin:6px;
+ border:none;
+ border-radius:6px;
+}
+
+button{
+ background:#22c55e;
+ color:white;
+ cursor:pointer;
+}
+
+.taskBtn{background:#3b82f6;}
+.withdrawBtn{background:#f59e0b;}
+
+.hidden{display:none;}
+
+.balance{
+ font-size:22px;
+ color:#22c55e;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card" id="loginBox">
+<h2>Đăng nhập</h2>
+<input id="user" placeholder="Tài khoản">
+<input id="pass" type="password" placeholder="Mật khẩu">
+<button onclick="login()">Đăng nhập</button>
+<button onclick="register()">Đăng ký</button>
+</div>
+
+<div class="card hidden" id="dashboard">
+<h2>💰 Trung tâm nhiệm vụ</h2>
+
+<p>User: <b id="username"></b></p>
+<div class="balance" id="balance">0 VNĐ</div>
+
+<button class="taskBtn" onclick="createTask()">🚀 Làm nhiệm vụ</button>
+
+<button class="withdrawBtn" onclick="withdraw()">💸 Rút tiền</button>
+
+<p id="cooldownText"></p>
+
+<button onclick="logout()">Đăng xuất</button>
+</div>
+
+<script>
+
+/* ===== LOGIN ===== */
+function register(){
+ localStorage.setItem(user.value,
+ JSON.stringify({password:pass.value,balance:0,lastTask:0}));
+ alert("Đăng ký thành công");
+}
+
+function login(){
+ let data=localStorage.getItem(user.value);
+ if(!data) return alert("Sai tài khoản");
+
+ data=JSON.parse(data);
+ if(data.password!==pass.value)
+  return alert("Sai mật khẩu");
+
+ localStorage.setItem("currentUser",user.value);
+ openDashboard();
+}
+
+function openDashboard(){
+ loginBox.classList.add("hidden");
+ dashboard.classList.remove("hidden");
+
+ let u=localStorage.getItem("currentUser");
+ let data=JSON.parse(localStorage.getItem(u));
+
+ username.innerText=u;
+ balance.innerText=data.balance+" VNĐ";
+}
+
+/* ===== CREATE TASK ===== */
+async function createTask(){
+
+ let u=localStorage.getItem("currentUser");
+ let data=JSON.parse(localStorage.getItem(u));
+
+ let now=Math.floor(Date.now()/1000);
+
+ if(now-data.lastTask<30){
+  alert("⏳ Không spam nhiệm vụ!");
+  return;
+ }
+
+ let id=crypto.randomUUID().replaceAll("-","");
+
+ localStorage.setItem("task_"+id,u);
+
+ let target=window.location.origin+
+ "/task.html?id="+id;
+
+ let res=await fetch("/api/short?url="+encodeURIComponent(target));
+ let api=await res.json();
+
+ if(api.status==="success"){
+   window.location.href=api.shortenedUrl;
+ }else{
+   alert("API lỗi");
+ }
+}
+
+/* ===== WITHDRAW ===== */
+function withdraw(){
+
+ let u=localStorage.getItem("currentUser");
+ let data=JSON.parse(localStorage.getItem(u));
+
+ if(data.balance<10000){
+   alert("Tối thiểu rút 10k");
+   return;
+ }
+
+ window.open(
+ "https://www.facebook.com/profile.php?id=61555922620631",
+ "_blank"
+ );
+}
+
+/* ===== LOGOUT ===== */
+function logout(){
+ localStorage.removeItem("currentUser");
+ location.reload();
+}
+
+if(localStorage.getItem("currentUser")){
+ openDashboard();
+}
+
+</script>
+
+</body>
+</html>
