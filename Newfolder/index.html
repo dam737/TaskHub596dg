@@ -1,48 +1,115 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
 <meta charset="UTF-8">
 <title>TaskHub</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
 <style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
+}
+
 body{
-  font-family:Arial;
-  background:#0f172a;
+  background:linear-gradient(135deg,#0f172a,#020617);
   color:white;
   text-align:center;
+  min-height:100vh;
 }
+
+/* ===== TITLE ===== */
+
+h1{
+  margin-top:20px;
+  font-size:32px;
+  background:linear-gradient(90deg,#22c55e,#38bdf8,#a855f7);
+  -webkit-background-clip:text;
+  color:transparent;
+}
+
+/* ===== CARD ===== */
 
 .box{
-  background:#1e293b;
-  padding:20px;
-  margin:20px auto;
-  width:360px;
-  border-radius:12px;
+  background:#1e293bcc;
+  backdrop-filter:blur(12px);
+  padding:25px;
+  margin:25px auto;
+  width:380px;
+  border-radius:16px;
+  box-shadow:0 0 25px rgba(0,0,0,.5);
+  animation:fade .5s ease;
 }
 
-button{
-  padding:10px;
-  margin:6px;
-  border:none;
-  border-radius:6px;
-  background:#22c55e;
-  color:white;
-  cursor:pointer;
+@keyframes fade{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1}
 }
+
+/* ===== INPUT ===== */
 
 input{
-  padding:10px;
-  margin:5px;
   width:90%;
+  padding:11px;
+  margin:8px;
+  border:none;
+  border-radius:8px;
+  outline:none;
+  background:#0f172a;
+  color:white;
 }
+
+/* ===== BUTTON ===== */
+
+button{
+  padding:10px 14px;
+  margin:6px;
+  border:none;
+  border-radius:8px;
+  background:linear-gradient(45deg,#22c55e,#16a34a);
+  color:white;
+  cursor:pointer;
+  transition:.25s;
+  font-weight:500;
+}
+
+button:hover{
+  transform:scale(1.05);
+  box-shadow:0 0 12px #22c55e;
+}
+
+/* logout button */
+.logout{
+  background:linear-gradient(45deg,#ef4444,#dc2626);
+}
+
+/* ===== GREETING ===== */
+
+#greet{
+  font-size:22px;
+  font-weight:700;
+  background:linear-gradient(90deg,#38bdf8,#22c55e,#facc15);
+  -webkit-background-clip:text;
+  color:transparent;
+}
+
+/* ===== MONEY ===== */
+
+.money{
+  font-size:20px;
+  color:#22c55e;
+}
+
+/* ===== POPUP ===== */
 
 #withdrawBox{
   position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.7);
+  inset:0;
+  background:rgba(0,0,0,.75);
   display:none;
   justify-content:center;
   align-items:center;
@@ -51,9 +118,24 @@ input{
 .popup{
   background:#1e293b;
   padding:25px;
-  border-radius:12px;
+  border-radius:15px;
   width:350px;
+  animation:fade .3s;
 }
+
+/* ===== MUSIC BTN ===== */
+
+.musicBtn{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#0ea5e9;
+  border-radius:50%;
+  width:55px;
+  height:55px;
+  font-size:20px;
+}
+
 </style>
 </head>
 
@@ -64,49 +146,62 @@ input{
 <!-- LOGIN -->
 <div id="auth" class="box">
 <h3>Đăng ký / Đăng nhập</h3>
-<input id="user" placeholder="Username">
-<input id="pass" type="password" placeholder="Password"><br>
 
+<input id="user" placeholder="Username">
+<input id="pass" type="password" placeholder="Password">
+
+<br>
 <button onclick="register()">Đăng ký</button>
 <button onclick="login()">Đăng nhập</button>
 </div>
 
 <!-- DASHBOARD -->
 <div id="dashboard" class="box" style="display:none">
-<h3>Xin chào <span id="name"></span></h3>
-<p>Số dư: <b id="money">0</b>đ</p>
+
+<h3 id="greet">Xin chào 👋 <span id="name"></span> !</h3>
+
+<p>Số dư:</p>
+<p class="money"><b id="money">0</b> đ</p>
 
 <button onclick="taoTask()">🧩 Làm nhiệm vụ</button>
 <button onclick="rutTien()">💸 Rút tiền</button>
+<button class="logout" onclick="logout()">🚪 Đăng xuất</button>
 
 <p id="status"></p>
+
 </div>
 
 <!-- POPUP RÚT TIỀN -->
 <div id="withdrawBox">
-  <div class="popup">
+<div class="popup">
 
-    <h3>💸 Yêu cầu rút tiền</h3>
+<h3>💸 Yêu cầu rút tiền</h3>
 
-    <p>Hỗ trợ rút qua:</p>
+<p>✅ Hỗ trợ:</p>
+<p>🏦 Ngân hàng (MB, VP, Vietcombank...)</p>
+<p>📱 Thẻ cào (Viettel / Mobi / Vina)</p>
 
-    <p>🏦 Chuyển khoản ngân hàng</p>
-    <p>📱 Thẻ cào (Viettel / Mobi / Vina)</p>
+<hr style="margin:15px 0">
 
-    <hr>
+<p>👉 Nhắn Admin để xử lý</p>
 
-    <p>👉 Nhắn tin Facebook để rút tiền</p>
+<button onclick="openFB()">📩 IB Admin</button>
+<br><br>
+<button onclick="closeWithdraw()">Đóng</button>
 
-    <button onclick="openFB()">📩 IB Admin</button>
-    <br><br>
-    <button onclick="closeWithdraw()">Đóng</button>
-
-  </div>
 </div>
+</div>
+
+<!-- MUSIC -->
+<audio id="bgm" loop>
+<source src="https://files.catbox.moe/6h5y0m.mp3" type="audio/mpeg">
+</audio>
+
+<button class="musicBtn" onclick="toggleMusic()">🎵</button>
 
 <script>
 
-/* ================= LOGIN ================= */
+/* ========= ACCOUNT ========= */
 
 function saveUser(u,p){
  localStorage.setItem("acc_"+u,p);
@@ -116,10 +211,7 @@ function register(){
  let u=user.value.trim();
  let p=pass.value.trim();
 
- if(!u || !p){
-   alert("Nhập đầy đủ thông tin");
-   return;
- }
+ if(!u||!p) return alert("Nhập đầy đủ!");
 
  saveUser(u,p);
  alert("✅ Đăng ký thành công");
@@ -135,6 +227,13 @@ function login(){
  }else alert("Sai tài khoản");
 }
 
+function logout(){
+ localStorage.removeItem("login");
+ location.reload();
+}
+
+/* ========= START ========= */
+
 function start(){
  let u=localStorage.getItem("login");
  if(!u) return;
@@ -147,55 +246,23 @@ function start(){
 }
 start();
 
-/* ================= TASK ================= */
+/* ========= TASK ========= */
 
 function randomID(){
- return crypto.randomUUID().replaceAll("-","")+Date.now();
+ return crypto.randomUUID().replaceAll("-","");
 }
 
 async function taoTask(){
 
- let user = localStorage.getItem("login");
- if(!user){
-   alert("Vui lòng đăng nhập!");
-   return;
- }
-
  status.innerText="⏳ Đang tạo nhiệm vụ...";
 
- let id=randomID();
-
- let final="https://google.com";
-
- let taskURL =
- location.origin +
- "/task.html?id="+id+
- "&url="+encodeURIComponent(final);
-
- try{
-
-   let r=await fetch(
-     `/api/short?url=${encodeURIComponent(taskURL)}`
-   );
-
-   let d=await r.json();
-
-   if(!d.short){
-     status.innerText="❌ Lỗi tạo nhiệm vụ";
-     return;
-   }
-
-   status.innerText="✅ Đang mở nhiệm vụ...";
-
-   // 🔥 tự mở YeuMoney
-   window.open(d.short,"_blank");
-
- }catch{
-   status.innerText="❌ Server lỗi";
- }
+ setTimeout(()=>{
+   status.innerText="✅ Nhiệm vụ đã mở!";
+   window.open("https://google.com","_blank");
+ },1200);
 }
 
-/* ================= RÚT TIỀN ================= */
+/* ========= WITHDRAW ========= */
 
 function rutTien(){
  withdrawBox.style.display="flex";
@@ -210,6 +277,22 @@ function openFB(){
  "https://www.facebook.com/profile.php?id=61555922620631",
  "_blank"
  );
+}
+
+/* ========= MUSIC ========= */
+
+let playing=false;
+
+function toggleMusic(){
+ let music=document.getElementById("bgm");
+
+ if(!playing){
+   music.play();
+   playing=true;
+ }else{
+   music.pause();
+   playing=false;
+ }
 }
 
 </script>
