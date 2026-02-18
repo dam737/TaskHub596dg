@@ -2,44 +2,65 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Nhiệm vụ</title>
+<title>Hoàn thành nhiệm vụ</title>
 <style>
-body{font-family:Arial;background:#111827;color:white;text-align:center}
-button{padding:12px;background:#22c55e;border:none;color:white;border-radius:8px}
+body{
+ font-family:Arial;
+ background:#0f172a;
+ color:white;
+ text-align:center;
+ margin-top:80px;
+}
+button{
+ padding:12px;
+ background:#22c55e;
+ border:none;
+ border-radius:8px;
+ color:white;
+ cursor:pointer;
+}
 </style>
 </head>
 
 <body>
 
-<h2>📋 Nhiệm vụ</h2>
-<p>Hãy xem trang và bấm hoàn thành</p>
+<h2>✅ Hoàn thành nhiệm vụ</h2>
+<p>Sau khi làm xong hãy bấm nút bên dưới</p>
 
-<button onclick="done()">✅ Hoàn thành nhiệm vụ</button>
+<button onclick="done()">Nhận thưởng</button>
 
 <script>
+
 function done(){
 
- const params=new URLSearchParams(location.search);
- const id=params.get("id");
+ const params = new URLSearchParams(location.search);
+ const user = params.get("user");
 
- const user=localStorage.getItem("login");
-
- if(localStorage.getItem("done_"+id)){
-   alert("Bạn đã làm nhiệm vụ này rồi!");
+ if(!user){
+   alert("Lỗi nhiệm vụ");
    return;
  }
 
- localStorage.setItem("done_"+id,true);
+ // chống spam
+ if(localStorage.getItem("done_"+location.href)){
+   alert("Bạn đã nhận thưởng rồi!");
+   return;
+ }
 
- let money=Number(localStorage.getItem("money_"+user)||0);
- money+=1000;
+ localStorage.setItem("done_"+location.href,true);
+
+ let money =
+ Number(localStorage.getItem("money_"+user)||0);
+
+ money += 1000;
 
  localStorage.setItem("money_"+user,money);
 
- alert("+1000đ thành công!");
+ alert("🎉 +1000đ thành công!");
 
- location.href=params.get("url");
+ window.close();
 }
+
 </script>
 
 </body>
