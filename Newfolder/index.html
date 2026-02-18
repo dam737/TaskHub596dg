@@ -12,13 +12,24 @@ body{
  text-align:center;
 }
 
+/* BOX */
 .box{
  background:#1e293b;
  padding:25px;
  margin:30px auto;
  width:360px;
- border-radius:12px;
- box-shadow:0 0 20px #0005;
+ border-radius:14px;
+ box-shadow:0 0 25px #0006;
+}
+
+/* HELLO TEXT */
+.hello{
+ font-size:20px;
+ font-weight:bold;
+ background:linear-gradient(90deg,#22c55e,#38bdf8);
+ -webkit-background-clip:text;
+ color:transparent;
+ margin-bottom:10px;
 }
 
 button{
@@ -36,6 +47,10 @@ button:hover{
  background:#16a34a;
 }
 
+.logout{
+ background:#ef4444;
+}
+
 input{
  padding:10px;
  margin:6px;
@@ -44,8 +59,24 @@ input{
  border:none;
 }
 
-.logout{
- background:#ef4444;
+/* POPUP */
+#withdrawBox{
+ position:fixed;
+ top:0;
+ left:0;
+ width:100%;
+ height:100%;
+ background:rgba(0,0,0,0.7);
+ display:none;
+ justify-content:center;
+ align-items:center;
+}
+
+.popup{
+ background:#1e293b;
+ padding:25px;
+ border-radius:12px;
+ width:340px;
 }
 </style>
 </head>
@@ -69,11 +100,13 @@ input{
 <!-- DASHBOARD -->
 <div id="dashboard" class="box" style="display:none">
 
-<h3>Xin chào <span id="name" style="color:#22c55e"></span> 👋</h3>
+<div class="hello">
+👋 Xin chào <span id="name"></span> !
+</div>
 
 <p>Số dư: <b id="money">0</b>đ</p>
 
-<button onclick="taoTask()">🧩 Làm nhiệm vụ</button>
+<button onclick="taoTask()">🧩 Làm nhiệm vụ (+200đ)</button>
 <button onclick="rutTien()">💸 Rút tiền</button>
 <button class="logout" onclick="logout()">Đăng xuất</button>
 
@@ -81,9 +114,30 @@ input{
 
 </div>
 
+<!-- POPUP RÚT TIỀN -->
+<div id="withdrawBox">
+ <div class="popup">
+
+   <h3>💸 Rút tiền</h3>
+
+   <p>✅ Hỗ trợ rút qua:</p>
+   <p>📱 Thẻ cào (Viettel / Mobi / Vina)</p>
+   <p>🏦 Chuyển khoản ngân hàng</p>
+
+   <hr>
+
+   <p>👉 IB Facebook để được hỗ trợ rút:</p>
+
+   <button onclick="openFB()">📩 IB Admin</button>
+   <br><br>
+   <button onclick="closeWithdraw()">Đóng</button>
+
+ </div>
+</div>
+
 <script>
 
-/* ================= AUTH ================= */
+/* ========= AUTH ========= */
 
 function register(){
  let u=user.value.trim();
@@ -92,7 +146,7 @@ function register(){
  if(!u||!p) return alert("Nhập đủ thông tin");
 
  localStorage.setItem("acc_"+u,p);
- alert("Đăng ký thành công");
+ alert("✅ Đăng ký thành công");
 }
 
 function login(){
@@ -123,47 +177,54 @@ function start(){
 }
 start();
 
-/* ================= TASK ================= */
+/* ========= TASK ========= */
 
 async function taoTask(){
 
  let user = localStorage.getItem("login");
  if(!user) return alert("Chưa đăng nhập");
 
- status.innerText="Đang tạo nhiệm vụ...";
+ status.innerText="⏳ Đang tạo nhiệm vụ...";
 
- // ✅ LINK TASK CỦA CHÍNH WEB
+ // link quay lại hoàn thành
  let taskLink =
  location.origin +
  "/task.html?user="+user;
 
  try{
 
-   let res = await fetch(
+   let res=await fetch(
      "/api/short?url="+encodeURIComponent(taskLink)
    );
 
-   let data = await res.json();
+   let data=await res.json();
 
    if(!data.short){
-     status.innerText="API lỗi";
+     status.innerText="❌ Lỗi API";
      return;
    }
 
-   status.innerText="Đang mở nhiệm vụ...";
+   status.innerText="✅ Đang mở nhiệm vụ...";
 
-   // ✅ MỞ YEUMONEY
    window.open(data.short,"_blank");
 
  }catch{
-   status.innerText="Server lỗi";
+   status.innerText="❌ Server lỗi";
  }
 
 }
 
-/* ================= RÚT TIỀN ================= */
+/* ========= RÚT TIỀN ========= */
 
 function rutTien(){
+ withdrawBox.style.display="flex";
+}
+
+function closeWithdraw(){
+ withdrawBox.style.display="none";
+}
+
+function openFB(){
  window.open(
  "https://www.facebook.com/profile.php?id=61555922620631",
  "_blank"
